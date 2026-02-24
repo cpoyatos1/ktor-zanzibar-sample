@@ -1,0 +1,18 @@
+###
+POST http://localhost:8080/admin/tuples
+Content-Type: application/json
+
+{
+  "user": "alice",
+  "relation": "reader",
+  "object_type": "document",
+  "object_id": "1"
+}
+
+###
+GET http://localhost:8080/documents/1
+X-User: alice
+
+###
+GET http://localhost:8080/documents/1
+X-User: bob
