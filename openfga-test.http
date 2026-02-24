@@ -1,4 +1,6 @@
-###
+### ── Direct user → document access ─────────────────────────────
+
+### 1. Grant alice direct reader access to document 1
 POST http://localhost:8080/admin/tuples
 Content-Type: application/json
 
@@ -9,10 +11,42 @@ Content-Type: application/json
   "object_id": "1"
 }
 
-###
+### 2. alice can view document 1 (200 OK)
 GET http://localhost:8080/documents/1
 X-User: alice
 
-###
+### 3. bob cannot view document 1 (403 Forbidden)
 GET http://localhost:8080/documents/1
+X-User: bob
+
+### ── Indirect access: user → group → document ─────────────────
+
+### 4. Add charlie as a member of the "engineering" group
+POST http://localhost:8080/admin/tuples
+Content-Type: application/json
+
+{
+  "user": "charlie",
+  "relation": "member",
+  "object_type": "group",
+  "object_id": "engineering"
+}
+
+### 5. Grant the engineering group reader access to document 2
+POST http://localhost:8080/admin/tuples
+Content-Type: application/json
+
+{
+  "subject": "group:engineering#member",
+  "relation": "reader",
+  "object_type": "document",
+  "object_id": "2"
+}
+
+### 6. charlie can view document 2 via group membership (200 OK)
+GET http://localhost:8080/documents/2
+X-User: charlie
+
+### 7. bob still cannot view document 2 (403 Forbidden)
+GET http://localhost:8080/documents/2
 X-User: bob

@@ -5,6 +5,19 @@
       "type": "user"
     },
     {
+      "type": "group",
+      "relations": {
+        "member": { "this": {} }
+      },
+      "metadata": {
+        "relations": {
+          "member": {
+            "directly_related_user_types": [{ "type": "user" }]
+          }
+        }
+      }
+    },
+    {
       "type": "document",
       "relations": {
         "admin": { "this": {} },
@@ -30,7 +43,10 @@
             "directly_related_user_types": [{ "type": "user" }]
           },
           "reader": {
-            "directly_related_user_types": [{ "type": "user" }]
+            "directly_related_user_types": [
+              { "type": "user" },
+              { "type": "group", "relation": "member" }
+            ]
           },
           "writer": {
             "directly_related_user_types": [{ "type": "user" }]

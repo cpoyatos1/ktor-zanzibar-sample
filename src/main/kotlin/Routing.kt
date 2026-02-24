@@ -43,26 +43,31 @@ fun Application.configureRouting() {
              */
             post("/tuples") {
                 val body = call.receive<Map<String, String>>()
-                val user = body["user"] ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "missing user"))
                 val relation = body["relation"] ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "missing relation"))
                 val objectType =
                     body["object_type"] ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "missing object_type"))
                 val objectId =
                     body["object_id"] ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "missing object_id"))
 
+                // "subject" is the full OpenFGA user string (e.g. "group:engineering#member"),
+                // "user" is a shorthand that gets prefixed with "user:"
+                val subject = body["subject"]
+                    ?: body["user"]?.let { "user:$it" }
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "missing user or subject"))
+
                 val fga = application.attributes[OpenFgaClientKey]
                 val req =
                     ClientWriteRequest().writes(
                         listOf(
                             ClientTupleKey()
-                                .user("user:$user")
+                                .user(subject)
                                 .relation(relation)
                                 ._object("$objectType:$objectId"),
                         ),
                     )
                 fga.write(req).get()
 
-                call.respond(mapOf("status" to "ok", "tuple" to "user:$user#$relation@$objectType:$objectId"))
+                call.respond(mapOf("status" to "ok", "tuple" to "$subject#$relation@$objectType:$objectId"))
             }
 
             /**
@@ -71,7 +76,6 @@ fun Application.configureRouting() {
              */
             delete("/tuples") {
                 val body = call.receive<Map<String, String>>()
-                val user = body["user"] ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "missing user"))
                 val relation =
                     body["relation"] ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "missing relation"))
                 val objectType =
@@ -79,19 +83,23 @@ fun Application.configureRouting() {
                 val objectId =
                     body["object_id"] ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "missing object_id"))
 
+                val subject = body["subject"]
+                    ?: body["user"]?.let { "user:$it" }
+                    ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "missing user or subject"))
+
                 val fga = application.attributes[OpenFgaClientKey]
                 val req =
                     ClientWriteRequest().deletes(
                         listOf(
                             ClientTupleKeyWithoutCondition()
-                                .user("user:$user")
+                                .user(subject)
                                 .relation(relation)
                                 ._object("$objectType:$objectId"),
                         ),
                     )
                 fga.write(req).get()
 
-                call.respond(mapOf("status" to "ok", "deleted" to "user:$user#$relation@$objectType:$objectId"))
+                call.respond(mapOf("status" to "ok", "deleted" to "$subject#$relation@$objectType:$objectId"))
             }
         }
     }
