@@ -55,7 +55,7 @@ After editing the `.fga` file, regenerate the JSON using the [FGA CLI](https://g
 brew install openfga/tap/fga
 
 # Convert DSL → JSON
-fga model transform --inputfile src/main/resources/openfga/model.fga > src/main/resources/openfga/model.json
+fga model transform --file src/main/resources/openfga/model.fga > src/main/resources/openfga/model.json
 ```
 
 ## API Usage
