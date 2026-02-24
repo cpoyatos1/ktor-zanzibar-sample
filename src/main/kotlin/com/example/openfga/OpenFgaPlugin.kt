@@ -3,7 +3,6 @@ package com.example.openfga
 import dev.openfga.sdk.api.client.OpenFgaClient
 import dev.openfga.sdk.api.configuration.ClientConfiguration
 import dev.openfga.sdk.api.model.WriteAuthorizationModelRequest
-import io.ktor.events.*
 import io.ktor.server.application.*
 import io.ktor.util.*
 
@@ -30,7 +29,7 @@ class OpenFgaConfig {
     var useDevContainers: Boolean = true
 
     /** The authorization model to apply when starting dev containers. */
-    var authorizationModel: WriteAuthorizationModelRequest = buildDocumentAuthorizationModel()
+    var authorizationModel: WriteAuthorizationModelRequest = loadAuthorizationModel()
 }
 
 /**

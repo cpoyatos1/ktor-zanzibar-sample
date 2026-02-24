@@ -29,17 +29,33 @@ Ktor starts in **development mode** by default. On startup it will:
 
 ## Authorization Model
 
+The model is defined in OpenFGA DSL at `src/main/resources/openfga/model.fga`:
+
 ```
-definition user {}
+model
+  schema 1.1
 
-definition document {
-    relation admin: user
-    relation reader: user
-    relation writer: user
+type user
 
-    permission edit = writer
-    permission view = reader + edit
-}
+type document
+  relations
+    define admin: [user]
+    define reader: [user]
+    define writer: [user]
+
+    define edit: writer
+    define view: reader or edit
+```
+
+The OpenFGA API only accepts JSON, so the app loads `src/main/resources/openfga/model.json` at startup.
+After editing the `.fga` file, regenerate the JSON using the [FGA CLI](https://github.com/openfga/cli):
+
+```bash
+# Install the FGA CLI (once)
+brew install openfga/tap/fga
+
+# Convert DSL → JSON
+fga model transform --inputfile src/main/resources/openfga/model.fga > src/main/resources/openfga/model.json
 ```
 
 ## API Usage
